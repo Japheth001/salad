@@ -1,0 +1,379 @@
+<html>
+<head>
+<title>MainActivity.kt</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #546e7a; font-style: italic;}
+.s1 { color: #c3cee3;}
+.s2 { color: #c792ea; font-style: italic;}
+.s3 { color: #89ddff;}
+.s4 { color: #c3e88d;}
+.s5 { color: #f78c6c;}
+</style>
+</head>
+<body bgcolor="#263238">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+MainActivity.kt</font>
+</center></td></tr></table>
+<pre><span class="s0">/**</span>
+ <span class="s0">* Copyright 2021 Google LLC</span>
+ <span class="s0">*</span>
+ <span class="s0">* Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+ <span class="s0">* you may not use this file except in compliance with the License.</span>
+ <span class="s0">* You may obtain a copy of the License at</span>
+ <span class="s0">*</span>
+ <span class="s0">* https://www.apache.org/licenses/LICENSE-2.0</span>
+ <span class="s0">*</span>
+ <span class="s0">* Unless required by applicable law or agreed to in writing, software</span>
+ <span class="s0">* distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+ <span class="s0">* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+ <span class="s0">* See the License for the specific language governing permissions and</span>
+ <span class="s0">* limitations under the License.</span>
+ <span class="s0">*/</span>
+
+<span class="s2">package </span><span class="s1">org</span><span class="s3">.</span><span class="s1">tensorflow</span><span class="s3">.</span><span class="s1">codelabs</span><span class="s3">.</span><span class="s1">objectdetection</span>
+
+<span class="s1">import android</span><span class="s3">.</span><span class="s1">app</span><span class="s3">.</span><span class="s1">Activity</span>
+<span class="s1">import android</span><span class="s3">.</span><span class="s1">content</span><span class="s3">.</span><span class="s1">ActivityNotFoundException</span>
+<span class="s1">import android</span><span class="s3">.</span><span class="s1">content</span><span class="s3">.</span><span class="s1">Intent</span>
+<span class="s1">import android</span><span class="s3">.</span><span class="s1">graphics</span><span class="s3">.*</span>
+<span class="s1">import android</span><span class="s3">.</span><span class="s1">net</span><span class="s3">.</span><span class="s1">Uri</span>
+<span class="s1">import android</span><span class="s3">.</span><span class="s1">os</span><span class="s3">.</span><span class="s1">Bundle</span>
+<span class="s1">import android</span><span class="s3">.</span><span class="s1">os</span><span class="s3">.</span><span class="s1">Environment</span>
+<span class="s1">import android</span><span class="s3">.</span><span class="s1">provider</span><span class="s3">.</span><span class="s1">MediaStore</span>
+<span class="s1">import android</span><span class="s3">.</span><span class="s1">util</span><span class="s3">.</span><span class="s1">Log</span>
+<span class="s1">import android</span><span class="s3">.</span><span class="s1">view</span><span class="s3">.</span><span class="s1">View</span>
+<span class="s1">import android</span><span class="s3">.</span><span class="s1">widget</span><span class="s3">.</span><span class="s1">Button</span>
+<span class="s1">import android</span><span class="s3">.</span><span class="s1">widget</span><span class="s3">.</span><span class="s1">ImageView</span>
+<span class="s1">import android</span><span class="s3">.</span><span class="s1">widget</span><span class="s3">.</span><span class="s1">TextView</span>
+<span class="s1">import androidx</span><span class="s3">.</span><span class="s1">appcompat</span><span class="s3">.</span><span class="s1">app</span><span class="s3">.</span><span class="s1">AppCompatActivity</span>
+<span class="s1">import androidx</span><span class="s3">.</span><span class="s1">core</span><span class="s3">.</span><span class="s1">content</span><span class="s3">.</span><span class="s1">FileProvider</span>
+<span class="s1">import androidx</span><span class="s3">.</span><span class="s1">exifinterface</span><span class="s3">.</span><span class="s1">media</span><span class="s3">.</span><span class="s1">ExifInterface</span>
+<span class="s1">import androidx</span><span class="s3">.</span><span class="s1">lifecycle</span><span class="s3">.</span><span class="s1">lifecycleScope</span>
+<span class="s1">import kotlinx</span><span class="s3">.</span><span class="s1">coroutines</span><span class="s3">.</span><span class="s1">Dispatchers</span>
+<span class="s1">import kotlinx</span><span class="s3">.</span><span class="s1">coroutines</span><span class="s3">.</span><span class="s1">launch</span>
+<span class="s1">import org</span><span class="s3">.</span><span class="s1">tensorflow</span><span class="s3">.</span><span class="s1">lite</span><span class="s3">.</span><span class="s1">support</span><span class="s3">.</span><span class="s1">image</span><span class="s3">.</span><span class="s1">TensorImage</span>
+<span class="s1">import org</span><span class="s3">.</span><span class="s1">tensorflow</span><span class="s3">.</span><span class="s1">lite</span><span class="s3">.</span><span class="s1">task</span><span class="s3">.</span><span class="s1">vision</span><span class="s3">.</span><span class="s1">detector</span><span class="s3">.</span><span class="s1">Detection</span>
+<span class="s1">import org</span><span class="s3">.</span><span class="s1">tensorflow</span><span class="s3">.</span><span class="s1">lite</span><span class="s3">.</span><span class="s1">task</span><span class="s3">.</span><span class="s1">vision</span><span class="s3">.</span><span class="s1">detector</span><span class="s3">.</span><span class="s1">ObjectDetector</span>
+<span class="s1">import java</span><span class="s3">.</span><span class="s1">io</span><span class="s3">.</span><span class="s1">File</span>
+<span class="s1">import java</span><span class="s3">.</span><span class="s1">io</span><span class="s3">.</span><span class="s1">IOException</span>
+<span class="s1">import java</span><span class="s3">.</span><span class="s1">text</span><span class="s3">.</span><span class="s1">SimpleDateFormat</span>
+<span class="s1">import java</span><span class="s3">.</span><span class="s1">util</span><span class="s3">.*</span>
+<span class="s1">import kotlin</span><span class="s3">.</span><span class="s1">math</span><span class="s3">.</span><span class="s1">max</span>
+<span class="s1">import kotlin</span><span class="s3">.</span><span class="s1">math</span><span class="s3">.</span><span class="s1">min</span>
+
+<span class="s2">class </span><span class="s1">MainActivity </span><span class="s3">: </span><span class="s1">AppCompatActivity</span><span class="s3">(), </span><span class="s1">View</span><span class="s3">.</span><span class="s1">OnClickListener </span><span class="s3">{</span>
+    <span class="s1">companion </span><span class="s2">object </span><span class="s3">{</span>
+        <span class="s1">const </span><span class="s2">val </span><span class="s1">TAG </span><span class="s3">= </span><span class="s4">&quot;TFLite - ODT&quot;</span>
+        <span class="s1">const </span><span class="s2">val </span><span class="s1">REQUEST_IMAGE_CAPTURE</span><span class="s3">: </span><span class="s1">Int </span><span class="s3">= </span><span class="s5">1</span>
+        <span class="s1">private const </span><span class="s2">val </span><span class="s1">MAX_FONT_SIZE </span><span class="s3">= </span><span class="s5">96F</span>
+    <span class="s3">}</span>
+
+    <span class="s1">private lateinit </span><span class="s2">var </span><span class="s1">captureImageFab</span><span class="s3">: </span><span class="s1">Button</span>
+    <span class="s1">private lateinit </span><span class="s2">var </span><span class="s1">inputImageView</span><span class="s3">: </span><span class="s1">ImageView</span>
+    <span class="s1">private lateinit </span><span class="s2">var </span><span class="s1">imgSampleOne</span><span class="s3">: </span><span class="s1">ImageView</span>
+    <span class="s1">private lateinit </span><span class="s2">var </span><span class="s1">imgSampleTwo</span><span class="s3">: </span><span class="s1">ImageView</span>
+    <span class="s1">private lateinit </span><span class="s2">var </span><span class="s1">imgSampleThree</span><span class="s3">: </span><span class="s1">ImageView</span>
+    <span class="s1">private lateinit </span><span class="s2">var </span><span class="s1">tvPlaceholder</span><span class="s3">: </span><span class="s1">TextView</span>
+    <span class="s1">private lateinit </span><span class="s2">var </span><span class="s1">currentPhotoPath</span><span class="s3">: </span><span class="s1">String</span>
+
+    <span class="s1">override </span><span class="s2">fun </span><span class="s1">onCreate</span><span class="s3">(</span><span class="s1">savedInstanceState</span><span class="s3">: </span><span class="s1">Bundle</span><span class="s3">?) {</span>
+        <span class="s2">super</span><span class="s3">.</span><span class="s1">onCreate</span><span class="s3">(</span><span class="s1">savedInstanceState</span><span class="s3">)</span>
+        <span class="s1">setContentView</span><span class="s3">(</span><span class="s1">R</span><span class="s3">.</span><span class="s1">layout</span><span class="s3">.</span><span class="s1">activity_main</span><span class="s3">)</span>
+
+        <span class="s1">captureImageFab </span><span class="s3">= </span><span class="s1">findViewById</span><span class="s3">(</span><span class="s1">R</span><span class="s3">.</span><span class="s1">id</span><span class="s3">.</span><span class="s1">captureImageFab</span><span class="s3">)</span>
+        <span class="s1">inputImageView </span><span class="s3">= </span><span class="s1">findViewById</span><span class="s3">(</span><span class="s1">R</span><span class="s3">.</span><span class="s1">id</span><span class="s3">.</span><span class="s1">imageView</span><span class="s3">)</span>
+        <span class="s1">imgSampleOne </span><span class="s3">= </span><span class="s1">findViewById</span><span class="s3">(</span><span class="s1">R</span><span class="s3">.</span><span class="s1">id</span><span class="s3">.</span><span class="s1">imgSampleOne</span><span class="s3">)</span>
+        <span class="s1">imgSampleTwo </span><span class="s3">= </span><span class="s1">findViewById</span><span class="s3">(</span><span class="s1">R</span><span class="s3">.</span><span class="s1">id</span><span class="s3">.</span><span class="s1">imgSampleTwo</span><span class="s3">)</span>
+        <span class="s1">imgSampleThree </span><span class="s3">= </span><span class="s1">findViewById</span><span class="s3">(</span><span class="s1">R</span><span class="s3">.</span><span class="s1">id</span><span class="s3">.</span><span class="s1">imgSampleThree</span><span class="s3">)</span>
+        <span class="s1">tvPlaceholder </span><span class="s3">= </span><span class="s1">findViewById</span><span class="s3">(</span><span class="s1">R</span><span class="s3">.</span><span class="s1">id</span><span class="s3">.</span><span class="s1">tvPlaceholder</span><span class="s3">)</span>
+
+        <span class="s1">captureImageFab</span><span class="s3">.</span><span class="s1">setOnClickListener</span><span class="s3">(</span><span class="s2">this</span><span class="s3">)</span>
+        <span class="s1">imgSampleOne</span><span class="s3">.</span><span class="s1">setOnClickListener</span><span class="s3">(</span><span class="s2">this</span><span class="s3">)</span>
+        <span class="s1">imgSampleTwo</span><span class="s3">.</span><span class="s1">setOnClickListener</span><span class="s3">(</span><span class="s2">this</span><span class="s3">)</span>
+        <span class="s1">imgSampleThree</span><span class="s3">.</span><span class="s1">setOnClickListener</span><span class="s3">(</span><span class="s2">this</span><span class="s3">)</span>
+    <span class="s3">}</span>
+
+    <span class="s1">override </span><span class="s2">fun </span><span class="s1">onActivityResult</span><span class="s3">(</span><span class="s1">requestCode</span><span class="s3">: </span><span class="s1">Int</span><span class="s3">, </span><span class="s1">resultCode</span><span class="s3">: </span><span class="s1">Int</span><span class="s3">, </span><span class="s1">data</span><span class="s3">: </span><span class="s1">Intent</span><span class="s3">?) {</span>
+        <span class="s2">super</span><span class="s3">.</span><span class="s1">onActivityResult</span><span class="s3">(</span><span class="s1">requestCode</span><span class="s3">, </span><span class="s1">resultCode</span><span class="s3">, </span><span class="s1">data</span><span class="s3">)</span>
+        <span class="s2">if </span><span class="s3">(</span><span class="s1">requestCode </span><span class="s3">== </span><span class="s1">REQUEST_IMAGE_CAPTURE </span><span class="s3">&amp;&amp;</span>
+            <span class="s1">resultCode </span><span class="s3">== </span><span class="s1">Activity</span><span class="s3">.</span><span class="s1">RESULT_OK</span>
+        <span class="s3">) {</span>
+            <span class="s1">setViewAndDetect</span><span class="s3">(</span><span class="s1">getCapturedImage</span><span class="s3">())</span>
+        <span class="s3">}</span>
+    <span class="s3">}</span>
+
+    <span class="s0">/**</span>
+     <span class="s0">* onClick(v: View?)</span>
+     <span class="s0">*      Detect touches on the UI components</span>
+     <span class="s0">*/</span>
+    <span class="s1">override </span><span class="s2">fun </span><span class="s1">onClick</span><span class="s3">(</span><span class="s1">v</span><span class="s3">: </span><span class="s1">View</span><span class="s3">?) {</span>
+        <span class="s2">when </span><span class="s3">(</span><span class="s1">v</span><span class="s3">?.</span><span class="s1">id</span><span class="s3">) {</span>
+            <span class="s1">R</span><span class="s3">.</span><span class="s1">id</span><span class="s3">.</span><span class="s1">captureImageFab </span><span class="s3">-&gt; {</span>
+                <span class="s2">try </span><span class="s3">{</span>
+                    <span class="s1">dispatchTakePictureIntent</span><span class="s3">()</span>
+                <span class="s3">} </span><span class="s1">catch </span><span class="s3">(</span><span class="s1">e</span><span class="s3">: </span><span class="s1">ActivityNotFoundException</span><span class="s3">) {</span>
+                    <span class="s1">Log</span><span class="s3">.</span><span class="s1">e</span><span class="s3">(</span><span class="s1">TAG</span><span class="s3">, </span><span class="s1">e</span><span class="s3">.</span><span class="s1">message</span><span class="s3">.</span><span class="s1">toString</span><span class="s3">())</span>
+                <span class="s3">}</span>
+            <span class="s3">}</span>
+            <span class="s1">R</span><span class="s3">.</span><span class="s1">id</span><span class="s3">.</span><span class="s1">imgSampleOne </span><span class="s3">-&gt; {</span>
+                <span class="s1">setViewAndDetect</span><span class="s3">(</span><span class="s1">getSampleImage</span><span class="s3">(</span><span class="s1">R</span><span class="s3">.</span><span class="s1">drawable</span><span class="s3">.</span><span class="s1">img_meal_one</span><span class="s3">))</span>
+            <span class="s3">}</span>
+            <span class="s1">R</span><span class="s3">.</span><span class="s1">id</span><span class="s3">.</span><span class="s1">imgSampleTwo </span><span class="s3">-&gt; {</span>
+                <span class="s1">setViewAndDetect</span><span class="s3">(</span><span class="s1">getSampleImage</span><span class="s3">(</span><span class="s1">R</span><span class="s3">.</span><span class="s1">drawable</span><span class="s3">.</span><span class="s1">img_meal_two</span><span class="s3">))</span>
+            <span class="s3">}</span>
+            <span class="s1">R</span><span class="s3">.</span><span class="s1">id</span><span class="s3">.</span><span class="s1">imgSampleThree </span><span class="s3">-&gt; {</span>
+                <span class="s1">setViewAndDetect</span><span class="s3">(</span><span class="s1">getSampleImage</span><span class="s3">(</span><span class="s1">R</span><span class="s3">.</span><span class="s1">drawable</span><span class="s3">.</span><span class="s1">img_meal_three</span><span class="s3">))</span>
+            <span class="s3">}</span>
+        <span class="s3">}</span>
+    <span class="s3">}</span>
+
+    <span class="s0">/**</span>
+     <span class="s0">* runObjectDetection(bitmap: Bitmap)</span>
+     <span class="s0">*      TFLite Object Detection function</span>
+     <span class="s0">*/</span>
+    <span class="s1">private </span><span class="s2">fun </span><span class="s1">runObjectDetection</span><span class="s3">(</span><span class="s1">bitmap</span><span class="s3">: </span><span class="s1">Bitmap</span><span class="s3">) {</span>
+        <span class="s0">// Step 1: Create TFLite's TensorImage object</span>
+        <span class="s2">val </span><span class="s1">image </span><span class="s3">= </span><span class="s1">TensorImage</span><span class="s3">.</span><span class="s1">fromBitmap</span><span class="s3">(</span><span class="s1">bitmap</span><span class="s3">)</span>
+
+        <span class="s0">// Step 2: Initialize the detector object</span>
+        <span class="s2">val </span><span class="s1">options </span><span class="s3">= </span><span class="s1">ObjectDetector</span><span class="s3">.</span><span class="s1">ObjectDetectorOptions</span><span class="s3">.</span><span class="s1">builder</span><span class="s3">()</span>
+                <span class="s3">.</span><span class="s1">setMaxResults</span><span class="s3">(</span><span class="s5">5</span><span class="s3">)</span>
+                <span class="s3">.</span><span class="s1">setScoreThreshold</span><span class="s3">(</span><span class="s5">0.3f</span><span class="s3">)</span>
+                <span class="s3">.</span><span class="s1">build</span><span class="s3">()</span>
+        <span class="s2">val </span><span class="s1">detector </span><span class="s3">= </span><span class="s1">ObjectDetector</span><span class="s3">.</span><span class="s1">createFromFileAndOptions</span><span class="s3">(</span>
+                <span class="s2">this</span><span class="s3">,</span>
+                <span class="s4">&quot;salad.tflite&quot;</span><span class="s3">,</span>
+                <span class="s1">options</span>
+        <span class="s3">)</span>
+
+        <span class="s0">// Step 3: Feed given image to the detector</span>
+        <span class="s2">val </span><span class="s1">results </span><span class="s3">= </span><span class="s1">detector</span><span class="s3">.</span><span class="s1">detect</span><span class="s3">(</span><span class="s1">image</span><span class="s3">)</span>
+
+        <span class="s0">// Step 4: Parse the detection result and show it</span>
+        <span class="s2">val </span><span class="s1">resultToDisplay </span><span class="s3">= </span><span class="s1">results</span><span class="s3">.</span><span class="s1">map </span><span class="s3">{</span>
+            <span class="s0">// Get the top-1 category and craft the display text</span>
+            <span class="s2">val </span><span class="s1">category </span><span class="s3">= </span><span class="s1">it</span><span class="s3">.</span><span class="s1">categories</span><span class="s3">.</span><span class="s1">first</span><span class="s3">()</span>
+            <span class="s2">val </span><span class="s1">text </span><span class="s3">= </span><span class="s4">&quot;</span><span class="s3">${</span><span class="s1">category</span><span class="s3">.</span><span class="s1">label</span><span class="s3">}</span><span class="s4">, </span><span class="s3">${</span><span class="s1">category</span><span class="s3">.</span><span class="s1">score</span><span class="s3">.</span><span class="s1">times</span><span class="s3">(</span><span class="s5">100</span><span class="s3">).</span><span class="s1">toInt</span><span class="s3">()}</span><span class="s4">%&quot;</span>
+
+            <span class="s0">// Create a data object to display the detection result</span>
+            <span class="s1">DetectionResult</span><span class="s3">(</span><span class="s1">it</span><span class="s3">.</span><span class="s1">boundingBox</span><span class="s3">, </span><span class="s1">text</span><span class="s3">)</span>
+        <span class="s3">}</span>
+        <span class="s0">// Draw the detection result on the bitmap and show it.</span>
+        <span class="s2">val </span><span class="s1">imgWithResult </span><span class="s3">= </span><span class="s1">drawDetectionResult</span><span class="s3">(</span><span class="s1">bitmap</span><span class="s3">, </span><span class="s1">resultToDisplay</span><span class="s3">)</span>
+        <span class="s1">runOnUiThread </span><span class="s3">{</span>
+            <span class="s1">inputImageView</span><span class="s3">.</span><span class="s1">setImageBitmap</span><span class="s3">(</span><span class="s1">imgWithResult</span><span class="s3">)</span>
+        <span class="s3">}</span>
+    <span class="s3">}</span>
+
+    <span class="s0">/**</span>
+     <span class="s0">* debugPrint(visionObjects: List&lt;Detection&gt;)</span>
+     <span class="s0">*      Print the detection result to logcat to examine</span>
+     <span class="s0">*/</span>
+    <span class="s1">private </span><span class="s2">fun </span><span class="s1">debugPrint</span><span class="s3">(</span><span class="s1">results </span><span class="s3">: </span><span class="s1">List</span><span class="s3">&lt;</span><span class="s1">Detection</span><span class="s3">&gt;) {</span>
+        <span class="s2">for </span><span class="s3">((</span><span class="s1">i</span><span class="s3">, </span><span class="s1">obj</span><span class="s3">) </span><span class="s2">in </span><span class="s1">results</span><span class="s3">.</span><span class="s1">withIndex</span><span class="s3">()) {</span>
+            <span class="s2">val </span><span class="s1">box </span><span class="s3">= </span><span class="s1">obj</span><span class="s3">.</span><span class="s1">boundingBox</span>
+
+            <span class="s1">Log</span><span class="s3">.</span><span class="s1">d</span><span class="s3">(</span><span class="s1">TAG</span><span class="s3">, </span><span class="s4">&quot;Detected object: </span><span class="s3">${</span><span class="s1">i</span><span class="s3">} </span><span class="s4">&quot;</span><span class="s3">)</span>
+            <span class="s1">Log</span><span class="s3">.</span><span class="s1">d</span><span class="s3">(</span><span class="s1">TAG</span><span class="s3">, </span><span class="s4">&quot;  boundingBox: (</span><span class="s3">${</span><span class="s1">box</span><span class="s3">.</span><span class="s1">left</span><span class="s3">}</span><span class="s4">, </span><span class="s3">${</span><span class="s1">box</span><span class="s3">.</span><span class="s1">top</span><span class="s3">}</span><span class="s4">) - (</span><span class="s3">${</span><span class="s1">box</span><span class="s3">.</span><span class="s1">right</span><span class="s3">}</span><span class="s4">,</span><span class="s3">${</span><span class="s1">box</span><span class="s3">.</span><span class="s1">bottom</span><span class="s3">}</span><span class="s4">)&quot;</span><span class="s3">)</span>
+
+            <span class="s2">for </span><span class="s3">((</span><span class="s1">j</span><span class="s3">, </span><span class="s1">category</span><span class="s3">) </span><span class="s2">in </span><span class="s1">obj</span><span class="s3">.</span><span class="s1">categories</span><span class="s3">.</span><span class="s1">withIndex</span><span class="s3">()) {</span>
+                <span class="s1">Log</span><span class="s3">.</span><span class="s1">d</span><span class="s3">(</span><span class="s1">TAG</span><span class="s3">, </span><span class="s4">&quot;    Label </span><span class="s3">$</span><span class="s1">j</span><span class="s4">: </span><span class="s3">${</span><span class="s1">category</span><span class="s3">.</span><span class="s1">label</span><span class="s3">}</span><span class="s4">&quot;</span><span class="s3">)</span>
+                <span class="s2">val </span><span class="s1">confidence</span><span class="s3">: </span><span class="s1">Int </span><span class="s3">= </span><span class="s1">category</span><span class="s3">.</span><span class="s1">score</span><span class="s3">.</span><span class="s1">times</span><span class="s3">(</span><span class="s5">100</span><span class="s3">).</span><span class="s1">toInt</span><span class="s3">()</span>
+                <span class="s1">Log</span><span class="s3">.</span><span class="s1">d</span><span class="s3">(</span><span class="s1">TAG</span><span class="s3">, </span><span class="s4">&quot;    Confidence: </span><span class="s3">${</span><span class="s1">confidence</span><span class="s3">}</span><span class="s4">%&quot;</span><span class="s3">)</span>
+            <span class="s3">}</span>
+        <span class="s3">}</span>
+    <span class="s3">}</span>
+
+    <span class="s0">/**</span>
+     <span class="s0">* setViewAndDetect(bitmap: Bitmap)</span>
+     <span class="s0">*      Set image to view and call object detection</span>
+     <span class="s0">*/</span>
+    <span class="s1">private </span><span class="s2">fun </span><span class="s1">setViewAndDetect</span><span class="s3">(</span><span class="s1">bitmap</span><span class="s3">: </span><span class="s1">Bitmap</span><span class="s3">) {</span>
+        <span class="s0">// Display capture image</span>
+        <span class="s1">inputImageView</span><span class="s3">.</span><span class="s1">setImageBitmap</span><span class="s3">(</span><span class="s1">bitmap</span><span class="s3">)</span>
+        <span class="s1">tvPlaceholder</span><span class="s3">.</span><span class="s1">visibility </span><span class="s3">= </span><span class="s1">View</span><span class="s3">.</span><span class="s1">INVISIBLE</span>
+
+        <span class="s0">// Run ODT and display result</span>
+        <span class="s0">// Note that we run this in the background thread to avoid blocking the app UI because</span>
+        <span class="s0">// TFLite object detection is a synchronised process.</span>
+        <span class="s1">lifecycleScope</span><span class="s3">.</span><span class="s1">launch</span><span class="s3">(</span><span class="s1">Dispatchers</span><span class="s3">.</span><span class="s1">Default</span><span class="s3">) { </span><span class="s1">runObjectDetection</span><span class="s3">(</span><span class="s1">bitmap</span><span class="s3">) }</span>
+    <span class="s3">}</span>
+
+    <span class="s0">/**</span>
+     <span class="s0">* getCapturedImage():</span>
+     <span class="s0">*      Decodes and crops the captured image from camera.</span>
+     <span class="s0">*/</span>
+    <span class="s1">private </span><span class="s2">fun </span><span class="s1">getCapturedImage</span><span class="s3">(): </span><span class="s1">Bitmap </span><span class="s3">{</span>
+        <span class="s0">// Get the dimensions of the View</span>
+        <span class="s2">val </span><span class="s1">targetW</span><span class="s3">: </span><span class="s1">Int </span><span class="s3">= </span><span class="s1">inputImageView</span><span class="s3">.</span><span class="s1">width</span>
+        <span class="s2">val </span><span class="s1">targetH</span><span class="s3">: </span><span class="s1">Int </span><span class="s3">= </span><span class="s1">inputImageView</span><span class="s3">.</span><span class="s1">height</span>
+
+        <span class="s2">val </span><span class="s1">bmOptions </span><span class="s3">= </span><span class="s1">BitmapFactory</span><span class="s3">.</span><span class="s1">Options</span><span class="s3">().</span><span class="s1">apply </span><span class="s3">{</span>
+            <span class="s0">// Get the dimensions of the bitmap</span>
+            <span class="s1">inJustDecodeBounds </span><span class="s3">= </span><span class="s2">true</span>
+
+            <span class="s1">BitmapFactory</span><span class="s3">.</span><span class="s1">decodeFile</span><span class="s3">(</span><span class="s1">currentPhotoPath</span><span class="s3">, </span><span class="s2">this</span><span class="s3">)</span>
+
+            <span class="s2">val </span><span class="s1">photoW</span><span class="s3">: </span><span class="s1">Int </span><span class="s3">= </span><span class="s1">outWidth</span>
+            <span class="s2">val </span><span class="s1">photoH</span><span class="s3">: </span><span class="s1">Int </span><span class="s3">= </span><span class="s1">outHeight</span>
+
+            <span class="s0">// Determine how much to scale down the image</span>
+            <span class="s2">val </span><span class="s1">scaleFactor</span><span class="s3">: </span><span class="s1">Int </span><span class="s3">= </span><span class="s1">max</span><span class="s3">(</span><span class="s5">1</span><span class="s3">, </span><span class="s1">min</span><span class="s3">(</span><span class="s1">photoW </span><span class="s3">/ </span><span class="s1">targetW</span><span class="s3">, </span><span class="s1">photoH </span><span class="s3">/ </span><span class="s1">targetH</span><span class="s3">))</span>
+
+            <span class="s0">// Decode the image file into a Bitmap sized to fill the View</span>
+            <span class="s1">inJustDecodeBounds </span><span class="s3">= </span><span class="s2">false</span>
+            <span class="s1">inSampleSize </span><span class="s3">= </span><span class="s1">scaleFactor</span>
+            <span class="s1">inMutable </span><span class="s3">= </span><span class="s2">true</span>
+        <span class="s3">}</span>
+        <span class="s2">val </span><span class="s1">exifInterface </span><span class="s3">= </span><span class="s1">ExifInterface</span><span class="s3">(</span><span class="s1">currentPhotoPath</span><span class="s3">)</span>
+        <span class="s2">val </span><span class="s1">orientation </span><span class="s3">= </span><span class="s1">exifInterface</span><span class="s3">.</span><span class="s1">getAttributeInt</span><span class="s3">(</span>
+            <span class="s1">ExifInterface</span><span class="s3">.</span><span class="s1">TAG_ORIENTATION</span><span class="s3">,</span>
+            <span class="s1">ExifInterface</span><span class="s3">.</span><span class="s1">ORIENTATION_UNDEFINED</span>
+        <span class="s3">)</span>
+
+        <span class="s2">val </span><span class="s1">bitmap </span><span class="s3">= </span><span class="s1">BitmapFactory</span><span class="s3">.</span><span class="s1">decodeFile</span><span class="s3">(</span><span class="s1">currentPhotoPath</span><span class="s3">, </span><span class="s1">bmOptions</span><span class="s3">)</span>
+        <span class="s2">return when </span><span class="s3">(</span><span class="s1">orientation</span><span class="s3">) {</span>
+            <span class="s1">ExifInterface</span><span class="s3">.</span><span class="s1">ORIENTATION_ROTATE_90 </span><span class="s3">-&gt; {</span>
+                <span class="s1">rotateImage</span><span class="s3">(</span><span class="s1">bitmap</span><span class="s3">, </span><span class="s5">90f</span><span class="s3">)</span>
+            <span class="s3">}</span>
+            <span class="s1">ExifInterface</span><span class="s3">.</span><span class="s1">ORIENTATION_ROTATE_180 </span><span class="s3">-&gt; {</span>
+                <span class="s1">rotateImage</span><span class="s3">(</span><span class="s1">bitmap</span><span class="s3">, </span><span class="s5">180f</span><span class="s3">)</span>
+            <span class="s3">}</span>
+            <span class="s1">ExifInterface</span><span class="s3">.</span><span class="s1">ORIENTATION_ROTATE_270 </span><span class="s3">-&gt; {</span>
+                <span class="s1">rotateImage</span><span class="s3">(</span><span class="s1">bitmap</span><span class="s3">, </span><span class="s5">270f</span><span class="s3">)</span>
+            <span class="s3">}</span>
+            <span class="s2">else </span><span class="s3">-&gt; {</span>
+                <span class="s1">bitmap</span>
+            <span class="s3">}</span>
+        <span class="s3">}</span>
+    <span class="s3">}</span>
+
+    <span class="s0">/**</span>
+     <span class="s0">* getSampleImage():</span>
+     <span class="s0">*      Get image form drawable and convert to bitmap.</span>
+     <span class="s0">*/</span>
+    <span class="s1">private </span><span class="s2">fun </span><span class="s1">getSampleImage</span><span class="s3">(</span><span class="s1">drawable</span><span class="s3">: </span><span class="s1">Int</span><span class="s3">): </span><span class="s1">Bitmap </span><span class="s3">{</span>
+        <span class="s2">return </span><span class="s1">BitmapFactory</span><span class="s3">.</span><span class="s1">decodeResource</span><span class="s3">(</span><span class="s1">resources</span><span class="s3">, </span><span class="s1">drawable</span><span class="s3">, </span><span class="s1">BitmapFactory</span><span class="s3">.</span><span class="s1">Options</span><span class="s3">().</span><span class="s1">apply </span><span class="s3">{</span>
+            <span class="s1">inMutable </span><span class="s3">= </span><span class="s2">true</span>
+        <span class="s3">})</span>
+    <span class="s3">}</span>
+
+    <span class="s0">/**</span>
+     <span class="s0">* rotateImage():</span>
+     <span class="s0">*     Decodes and crops the captured image from camera.</span>
+     <span class="s0">*/</span>
+    <span class="s1">private </span><span class="s2">fun </span><span class="s1">rotateImage</span><span class="s3">(</span><span class="s1">source</span><span class="s3">: </span><span class="s1">Bitmap</span><span class="s3">, </span><span class="s1">angle</span><span class="s3">: </span><span class="s1">Float</span><span class="s3">): </span><span class="s1">Bitmap </span><span class="s3">{</span>
+        <span class="s2">val </span><span class="s1">matrix </span><span class="s3">= </span><span class="s1">Matrix</span><span class="s3">()</span>
+        <span class="s1">matrix</span><span class="s3">.</span><span class="s1">postRotate</span><span class="s3">(</span><span class="s1">angle</span><span class="s3">)</span>
+        <span class="s2">return </span><span class="s1">Bitmap</span><span class="s3">.</span><span class="s1">createBitmap</span><span class="s3">(</span>
+            <span class="s1">source</span><span class="s3">, </span><span class="s5">0</span><span class="s3">, </span><span class="s5">0</span><span class="s3">, </span><span class="s1">source</span><span class="s3">.</span><span class="s1">width</span><span class="s3">, </span><span class="s1">source</span><span class="s3">.</span><span class="s1">height</span><span class="s3">,</span>
+            <span class="s1">matrix</span><span class="s3">, </span><span class="s2">true</span>
+        <span class="s3">)</span>
+    <span class="s3">}</span>
+
+    <span class="s0">/**</span>
+     <span class="s0">* createImageFile():</span>
+     <span class="s0">*     Generates a temporary image file for the Camera app to write to.</span>
+     <span class="s0">*/</span>
+    <span class="s1">@Throws</span><span class="s3">(</span><span class="s1">IOException</span><span class="s3">::</span><span class="s2">class</span><span class="s3">)</span>
+    <span class="s1">private </span><span class="s2">fun </span><span class="s1">createImageFile</span><span class="s3">(): </span><span class="s1">File </span><span class="s3">{</span>
+        <span class="s0">// Create an image file name</span>
+        <span class="s2">val </span><span class="s1">timeStamp</span><span class="s3">: </span><span class="s1">String </span><span class="s3">= </span><span class="s1">SimpleDateFormat</span><span class="s3">(</span><span class="s4">&quot;yyyyMMdd_HHmmss&quot;</span><span class="s3">).</span><span class="s1">format</span><span class="s3">(</span><span class="s1">Date</span><span class="s3">())</span>
+        <span class="s2">val </span><span class="s1">storageDir</span><span class="s3">: </span><span class="s1">File</span><span class="s3">? = </span><span class="s1">getExternalFilesDir</span><span class="s3">(</span><span class="s1">Environment</span><span class="s3">.</span><span class="s1">DIRECTORY_PICTURES</span><span class="s3">)</span>
+        <span class="s2">return </span><span class="s1">File</span><span class="s3">.</span><span class="s1">createTempFile</span><span class="s3">(</span>
+            <span class="s4">&quot;JPEG_</span><span class="s3">${</span><span class="s1">timeStamp</span><span class="s3">}</span><span class="s4">_&quot;</span><span class="s3">, </span><span class="s0">/* prefix */</span>
+            <span class="s4">&quot;.jpg&quot;</span><span class="s3">, </span><span class="s0">/* suffix */</span>
+            <span class="s1">storageDir </span><span class="s0">/* directory */</span>
+        <span class="s3">).</span><span class="s1">apply </span><span class="s3">{</span>
+            <span class="s0">// Save a file: path for use with ACTION_VIEW intents</span>
+            <span class="s1">currentPhotoPath </span><span class="s3">= </span><span class="s1">absolutePath</span>
+        <span class="s3">}</span>
+    <span class="s3">}</span>
+
+    <span class="s0">/**</span>
+     <span class="s0">* dispatchTakePictureIntent():</span>
+     <span class="s0">*     Start the Camera app to take a photo.</span>
+     <span class="s0">*/</span>
+    <span class="s1">private </span><span class="s2">fun </span><span class="s1">dispatchTakePictureIntent</span><span class="s3">() {</span>
+        <span class="s1">Intent</span><span class="s3">(</span><span class="s1">MediaStore</span><span class="s3">.</span><span class="s1">ACTION_IMAGE_CAPTURE</span><span class="s3">).</span><span class="s1">also </span><span class="s3">{ </span><span class="s1">takePictureIntent </span><span class="s3">-&gt;</span>
+            <span class="s0">// Ensure that there's a camera activity to handle the intent</span>
+            <span class="s1">takePictureIntent</span><span class="s3">.</span><span class="s1">resolveActivity</span><span class="s3">(</span><span class="s1">packageManager</span><span class="s3">)?.</span><span class="s1">also </span><span class="s3">{</span>
+                <span class="s0">// Create the File where the photo should go</span>
+                <span class="s2">val </span><span class="s1">photoFile</span><span class="s3">: </span><span class="s1">File</span><span class="s3">? = </span><span class="s2">try </span><span class="s3">{</span>
+                    <span class="s1">createImageFile</span><span class="s3">()</span>
+                <span class="s3">} </span><span class="s1">catch </span><span class="s3">(</span><span class="s1">e</span><span class="s3">: </span><span class="s1">IOException</span><span class="s3">) {</span>
+                    <span class="s1">Log</span><span class="s3">.</span><span class="s1">e</span><span class="s3">(</span><span class="s1">TAG</span><span class="s3">, </span><span class="s1">e</span><span class="s3">.</span><span class="s1">message</span><span class="s3">.</span><span class="s1">toString</span><span class="s3">())</span>
+                    <span class="s2">null</span>
+                <span class="s3">}</span>
+                <span class="s0">// Continue only if the File was successfully created</span>
+                <span class="s1">photoFile</span><span class="s3">?.</span><span class="s1">also </span><span class="s3">{</span>
+                    <span class="s2">val </span><span class="s1">photoURI</span><span class="s3">: </span><span class="s1">Uri </span><span class="s3">= </span><span class="s1">FileProvider</span><span class="s3">.</span><span class="s1">getUriForFile</span><span class="s3">(</span>
+                        <span class="s2">this</span><span class="s3">,</span>
+                        <span class="s4">&quot;org.tensorflow.codelabs.objectdetection.fileprovider&quot;</span><span class="s3">,</span>
+                        <span class="s1">it</span>
+                    <span class="s3">)</span>
+                    <span class="s1">takePictureIntent</span><span class="s3">.</span><span class="s1">putExtra</span><span class="s3">(</span><span class="s1">MediaStore</span><span class="s3">.</span><span class="s1">EXTRA_OUTPUT</span><span class="s3">, </span><span class="s1">photoURI</span><span class="s3">)</span>
+                    <span class="s1">startActivityForResult</span><span class="s3">(</span><span class="s1">takePictureIntent</span><span class="s3">, </span><span class="s1">REQUEST_IMAGE_CAPTURE</span><span class="s3">)</span>
+                <span class="s3">}</span>
+            <span class="s3">}</span>
+        <span class="s3">}</span>
+    <span class="s3">}</span>
+
+    <span class="s0">/**</span>
+     <span class="s0">* drawDetectionResult(bitmap: Bitmap, detectionResults: List&lt;DetectionResult&gt;</span>
+     <span class="s0">*      Draw a box around each objects and show the object's name.</span>
+     <span class="s0">*/</span>
+    <span class="s1">private </span><span class="s2">fun </span><span class="s1">drawDetectionResult</span><span class="s3">(</span>
+        <span class="s1">bitmap</span><span class="s3">: </span><span class="s1">Bitmap</span><span class="s3">,</span>
+        <span class="s1">detectionResults</span><span class="s3">: </span><span class="s1">List</span><span class="s3">&lt;</span><span class="s1">DetectionResult</span><span class="s3">&gt;</span>
+    <span class="s3">): </span><span class="s1">Bitmap </span><span class="s3">{</span>
+        <span class="s2">val </span><span class="s1">outputBitmap </span><span class="s3">= </span><span class="s1">bitmap</span><span class="s3">.</span><span class="s1">copy</span><span class="s3">(</span><span class="s1">Bitmap</span><span class="s3">.</span><span class="s1">Config</span><span class="s3">.</span><span class="s1">ARGB_8888</span><span class="s3">, </span><span class="s2">true</span><span class="s3">)</span>
+        <span class="s2">val </span><span class="s1">canvas </span><span class="s3">= </span><span class="s1">Canvas</span><span class="s3">(</span><span class="s1">outputBitmap</span><span class="s3">)</span>
+        <span class="s2">val </span><span class="s1">pen </span><span class="s3">= </span><span class="s1">Paint</span><span class="s3">()</span>
+        <span class="s1">pen</span><span class="s3">.</span><span class="s1">textAlign </span><span class="s3">= </span><span class="s1">Paint</span><span class="s3">.</span><span class="s1">Align</span><span class="s3">.</span><span class="s1">LEFT</span>
+
+        <span class="s1">detectionResults</span><span class="s3">.</span><span class="s1">forEach </span><span class="s3">{</span>
+            <span class="s0">// draw bounding box</span>
+            <span class="s1">pen</span><span class="s3">.</span><span class="s1">color </span><span class="s3">= </span><span class="s1">Color</span><span class="s3">.</span><span class="s1">RED</span>
+            <span class="s1">pen</span><span class="s3">.</span><span class="s1">strokeWidth </span><span class="s3">= </span><span class="s5">8F</span>
+            <span class="s1">pen</span><span class="s3">.</span><span class="s1">style </span><span class="s3">= </span><span class="s1">Paint</span><span class="s3">.</span><span class="s1">Style</span><span class="s3">.</span><span class="s1">STROKE</span>
+            <span class="s2">val </span><span class="s1">box </span><span class="s3">= </span><span class="s1">it</span><span class="s3">.</span><span class="s1">boundingBox</span>
+            <span class="s1">canvas</span><span class="s3">.</span><span class="s1">drawRect</span><span class="s3">(</span><span class="s1">box</span><span class="s3">, </span><span class="s1">pen</span><span class="s3">)</span>
+
+
+            <span class="s2">val </span><span class="s1">tagSize </span><span class="s3">= </span><span class="s1">Rect</span><span class="s3">(</span><span class="s5">0</span><span class="s3">, </span><span class="s5">0</span><span class="s3">, </span><span class="s5">0</span><span class="s3">, </span><span class="s5">0</span><span class="s3">)</span>
+
+            <span class="s0">// calculate the right font size</span>
+            <span class="s1">pen</span><span class="s3">.</span><span class="s1">style </span><span class="s3">= </span><span class="s1">Paint</span><span class="s3">.</span><span class="s1">Style</span><span class="s3">.</span><span class="s1">FILL_AND_STROKE</span>
+            <span class="s1">pen</span><span class="s3">.</span><span class="s1">color </span><span class="s3">= </span><span class="s1">Color</span><span class="s3">.</span><span class="s1">YELLOW</span>
+            <span class="s1">pen</span><span class="s3">.</span><span class="s1">strokeWidth </span><span class="s3">= </span><span class="s5">2F</span>
+
+            <span class="s1">pen</span><span class="s3">.</span><span class="s1">textSize </span><span class="s3">= </span><span class="s1">MAX_FONT_SIZE</span>
+            <span class="s1">pen</span><span class="s3">.</span><span class="s1">getTextBounds</span><span class="s3">(</span><span class="s1">it</span><span class="s3">.</span><span class="s1">text</span><span class="s3">, </span><span class="s5">0</span><span class="s3">, </span><span class="s1">it</span><span class="s3">.</span><span class="s1">text</span><span class="s3">.</span><span class="s1">length</span><span class="s3">, </span><span class="s1">tagSize</span><span class="s3">)</span>
+            <span class="s2">val </span><span class="s1">fontSize</span><span class="s3">: </span><span class="s1">Float </span><span class="s3">= </span><span class="s1">pen</span><span class="s3">.</span><span class="s1">textSize </span><span class="s3">* </span><span class="s1">box</span><span class="s3">.</span><span class="s1">width</span><span class="s3">() / </span><span class="s1">tagSize</span><span class="s3">.</span><span class="s1">width</span><span class="s3">()</span>
+
+            <span class="s0">// adjust the font size so texts are inside the bounding box</span>
+            <span class="s2">if </span><span class="s3">(</span><span class="s1">fontSize </span><span class="s3">&lt; </span><span class="s1">pen</span><span class="s3">.</span><span class="s1">textSize</span><span class="s3">) </span><span class="s1">pen</span><span class="s3">.</span><span class="s1">textSize </span><span class="s3">= </span><span class="s1">fontSize</span>
+
+            <span class="s2">var </span><span class="s1">margin </span><span class="s3">= (</span><span class="s1">box</span><span class="s3">.</span><span class="s1">width</span><span class="s3">() - </span><span class="s1">tagSize</span><span class="s3">.</span><span class="s1">width</span><span class="s3">()) / </span><span class="s5">2.0F</span>
+            <span class="s2">if </span><span class="s3">(</span><span class="s1">margin </span><span class="s3">&lt; </span><span class="s5">0F</span><span class="s3">) </span><span class="s1">margin </span><span class="s3">= </span><span class="s5">0F</span>
+            <span class="s1">canvas</span><span class="s3">.</span><span class="s1">drawText</span><span class="s3">(</span>
+                <span class="s1">it</span><span class="s3">.</span><span class="s1">text</span><span class="s3">, </span><span class="s1">box</span><span class="s3">.</span><span class="s1">left </span><span class="s3">+ </span><span class="s1">margin</span><span class="s3">,</span>
+                <span class="s1">box</span><span class="s3">.</span><span class="s1">top </span><span class="s3">+ </span><span class="s1">tagSize</span><span class="s3">.</span><span class="s1">height</span><span class="s3">().</span><span class="s1">times</span><span class="s3">(</span><span class="s5">1F</span><span class="s3">), </span><span class="s1">pen</span>
+            <span class="s3">)</span>
+        <span class="s3">}</span>
+        <span class="s2">return </span><span class="s1">outputBitmap</span>
+    <span class="s3">}</span>
+<span class="s3">}</span>
+
+<span class="s0">/**</span>
+ <span class="s0">* DetectionResult</span>
+ <span class="s0">*      A class to store the visualization info of a detected object.</span>
+ <span class="s0">*/</span>
+<span class="s1">data </span><span class="s2">class </span><span class="s1">DetectionResult</span><span class="s3">(</span><span class="s2">val </span><span class="s1">boundingBox</span><span class="s3">: </span><span class="s1">RectF</span><span class="s3">, </span><span class="s2">val </span><span class="s1">text</span><span class="s3">: </span><span class="s1">String</span><span class="s3">)</span>
+</pre>
+</body>
+</html>
